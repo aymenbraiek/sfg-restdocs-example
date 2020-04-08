@@ -14,13 +14,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.constraints.ConstraintDescriptions;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.RequestDocumentation;
+import org.springframework.restdocs.snippet.Attributes;
 import org.springframework.test.web.servlet.MockMvc;
 //import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.util.StringUtils;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -75,6 +80,7 @@ class BeerControllerTest {
     void saveNewBeer() throws Exception {
         BeerDto beerDto =  getValidBeerDto();
         String beerDtoJson = objectMapper.writeValueAsString(beerDto);
+        ConstrainedFields fields = new ConstrainedFields(BeerDto.class);
 
         mockMvc.perform(post("/api/v1/beer/")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -82,20 +88,21 @@ class BeerControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                  .andDo(MockMvcRestDocumentation.document("v1/beer",
                          PayloadDocumentation.requestFields(PayloadDocumentation.fieldWithPath("id").ignored(),
-                                 PayloadDocumentation.fieldWithPath("version").ignored(),
-                                 PayloadDocumentation.fieldWithPath("createdDate").ignored(),
-                                 PayloadDocumentation.fieldWithPath("lastModifiedDate").ignored(),
-                                 PayloadDocumentation.fieldWithPath("beerName").description("Beer Name"),
-                                 PayloadDocumentation.fieldWithPath("beerStyle").description("Beer style"),
-                                 PayloadDocumentation.fieldWithPath("upc").description("Beer UPC").attributes(),
-                                 PayloadDocumentation.fieldWithPath("price").description("Beer price"),
-                                 PayloadDocumentation.fieldWithPath("quantityOnHand").ignored())));
+                                 fields.withPath("version").ignored(),
+                                 fields.withPath("createdDate").ignored(),
+                                 fields.withPath("lastModifiedDate").ignored(),
+                                 fields.withPath("beerName").description("Beer Name"),
+                                 fields.withPath("beerStyle").description("Beer style"),
+                                 fields.withPath("upc").description("Beer UPC").attributes(),
+                                 fields.withPath("price").description("Beer price"),
+                                 fields.withPath("quantityOnHand").ignored())));
                                      }
 
     @Test
     void updateBeerById() throws Exception {
         BeerDto beerDto =  getValidBeerDto();
         String beerDtoJson = objectMapper.writeValueAsString(beerDto);
+
 
         mockMvc.perform(put("/api/v1/beer/" + UUID.randomUUID().toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -111,5 +118,19 @@ class BeerControllerTest {
                 .upc(123123123123L)
                 .build();
 
+    }
+    private static class ConstrainedFields {
+
+        private final ConstraintDescriptions constraintDescriptions;
+
+        ConstrainedFields(Class<?> input) {
+            this.constraintDescriptions = new ConstraintDescriptions(input);
+        }
+
+        private FieldDescriptor withPath(String path) {
+            return PayloadDocumentation.fieldWithPath(path).attributes(Attributes.key("constraints").value(StringUtils
+                    .collectionToDelimitedString(this.constraintDescriptions
+                            .descriptionsForProperty(path), ". ")));
+        }
     }
 }
