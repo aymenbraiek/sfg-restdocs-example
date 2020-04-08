@@ -15,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,15 +46,29 @@ class BeerControllerTest {
     void getBeerById() throws Exception {
         given(beerRepository.findById(any())).willReturn(Optional.of(Beer.builder().build()));
 
-        mockMvc.perform(get("/api/v1/beer/{beerId}" , UUID.randomUUID().toString())
-                .param("isCold","yes")
+        mockMvc.perform(get("/api/v1/beer/{beerId}", UUID.randomUUID().toString())
+                .param("iscold", "yes")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-        .andDo(MockMvcRestDocumentation.document("v1/beer", RequestDocumentation.pathParameters(
-                RequestDocumentation.parameterWithName("beerId").description("UUID TO DESIRED TO GET"))
-                ,RequestDocumentation.requestParameters(RequestDocumentation.parameterWithName("isCold")
-                .description("Is Beer Cold Query param"))
-        ));
+                .andDo(MockMvcRestDocumentation.document("v1/beer",
+                        RequestDocumentation.pathParameters (
+                                RequestDocumentation.parameterWithName("beerId").description("UUID of desired beer to get.")
+                        ),
+                        RequestDocumentation.requestParameters(
+                                RequestDocumentation.parameterWithName("iscold").description("Is Beer Cold Query param")
+                        ),
+                        PayloadDocumentation.responseFields(
+                                PayloadDocumentation.fieldWithPath("id").description("Id of Beer"),
+                                PayloadDocumentation.fieldWithPath("version").description("Version number"),
+                                PayloadDocumentation.fieldWithPath("createdDate").description("Date Created"),
+                                PayloadDocumentation.fieldWithPath("lastModifiedDate").description("Date Updated"),
+                                PayloadDocumentation.fieldWithPath("beerName").description("Beer Name"),
+                                PayloadDocumentation.fieldWithPath("beerStyle").description("Beer Style"),
+                                PayloadDocumentation.fieldWithPath("upc").description("UPC of Beer"),
+                                PayloadDocumentation.fieldWithPath("price").description("Price"),
+                                PayloadDocumentation.fieldWithPath("quantityOnHand").description("Quantity On hand")
+                        )));
+
     }
 
     @Test
@@ -64,8 +79,18 @@ class BeerControllerTest {
         mockMvc.perform(post("/api/v1/beer/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(beerDtoJson))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-    }
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                 .andDo(MockMvcRestDocumentation.document("v1/beer",
+                         PayloadDocumentation.requestFields(PayloadDocumentation.fieldWithPath("id").ignored(),
+                                 PayloadDocumentation.fieldWithPath("version").ignored(),
+                                 PayloadDocumentation.fieldWithPath("createdDate").ignored(),
+                                 PayloadDocumentation.fieldWithPath("lastModifiedDate").ignored(),
+                                 PayloadDocumentation.fieldWithPath("beerName").description("Beer Name"),
+                                 PayloadDocumentation.fieldWithPath("beerStyle").description("Beer style"),
+                                 PayloadDocumentation.fieldWithPath("upc").description("Beer UPC").attributes(),
+                                 PayloadDocumentation.fieldWithPath("price").description("Beer price"),
+                                 PayloadDocumentation.fieldWithPath("quantityOnHand").ignored())));
+                                     }
 
     @Test
     void updateBeerById() throws Exception {
