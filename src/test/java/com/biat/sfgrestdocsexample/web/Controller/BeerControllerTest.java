@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 @ExtendWith(RestDocumentationExtension.class)
-@AutoConfigureRestDocs
+@AutoConfigureRestDocs(uriScheme = "https",uriHost = "com.biat.sfgrestdocsexample",uriPort = 80)
 @WebMvcTest(BeerController.class)
 @ComponentScan(basePackages = "com.biat.sfgrestdocsexample.web.mappers")
 class BeerControllerTest {
