@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 @ExtendWith(RestDocumentationExtension.class)
-@AutoConfigureRestDocs(uriScheme = "https",uriHost = "com.biat.sfgrestdocsexample",uriPort = 80)
+@AutoConfigureRestDocs(uriScheme = "https",uriHost = "dev.springframework.biat",uriPort = 80)
 @WebMvcTest(BeerController.class)
 @ComponentScan(basePackages = "com.biat.sfgrestdocsexample.web.mappers")
 class BeerControllerTest {
@@ -55,7 +55,7 @@ class BeerControllerTest {
                 .param("iscold", "yes")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcRestDocumentation.document("v1/beer",
+                .andDo(MockMvcRestDocumentation.document("v1/beer-get",
                         RequestDocumentation.pathParameters (
                                 RequestDocumentation.parameterWithName("beerId").description("UUID of desired beer to get.")
                         ),
@@ -86,7 +86,7 @@ class BeerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(beerDtoJson))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                 .andDo(MockMvcRestDocumentation.document("v1/beer",
+                 .andDo(MockMvcRestDocumentation.document("v1/beer-new",
                          PayloadDocumentation.requestFields(PayloadDocumentation.fieldWithPath("id").ignored(),
                                  fields.withPath("version").ignored(),
                                  fields.withPath("createdDate").ignored(),

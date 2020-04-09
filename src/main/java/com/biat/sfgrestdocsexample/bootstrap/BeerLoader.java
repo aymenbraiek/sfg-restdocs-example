@@ -4,12 +4,14 @@ import com.biat.sfgrestdocsexample.Repository.BeerRepository;
 import com.biat.sfgrestdocsexample.domain.Beer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-
+@Component
 public class BeerLoader implements CommandLineRunner {
-   @Autowired
-    BeerRepository beerRepository;
+    @Autowired
+     BeerRepository beerRepository;
+
 
     @Override
     public void run(String... args) throws Exception {
